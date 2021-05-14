@@ -42,14 +42,35 @@ def getPriceHistory(skin_name, saveloc):
 
 item_types = ["attire","construction","item","tools","weapons"]
 
+#there is no elegant solution if you don't know anything
+file_error = open('storedata/error.txt',"r+")
+error_type = file_error.readline().rstrip()
+error_itemtype = file_error.readline().rstrip()
+error_skin = file_error.readline().rstrip()
+flag_et = flag_it = flag_sk = False
+if(error_type == '.'):
+    flag_et = flag_it = flag_sk = True
+    
+
 for item_type in item_types:
+    print(item_type + error_type)
+    if(error_type == item_type):
+        flag_et = True
+    if(flag_et == False):
+        continue
+    
     file_loc = 'storedata/typenames/{}'.format(item_type)
     file_read = open(file_loc,"r")
     
     item_names = file_read.readlines()
+    
 
     for item_name in item_names:
         item_name = item_name.rstrip()
+        if(item_name == error_itemtype):
+            flag_it = True
+        if(flag_it == False):
+            continue
 
         file_loc = 'storedata/{}_skins/{}'.format(item_type,item_name)
         skin_read = open(file_loc,"r")
@@ -58,10 +79,23 @@ for item_type in item_types:
 
         for skin_name in skin_names:
             skin_name = skin_name.rstrip()
+            if(skin_name == error_skin):
+                flag_sk = True
+            if(flag_sk == False):
+                continue;
+
             if(not os.path.exists('pricehistorydata/{}/{}'.format(item_type,item_name))):
                 os.mkdir('pricehistorydata/{}/{}'.format(item_type,item_name))
             saveloc = 'pricehistorydata/{}/{}/{}.csv'.format(item_type,item_name,skin_name)
             saveloc = saveloc.replace(' ','_')
             print(saveloc)
             getPriceHistory(skin_name, saveloc) 
+
+            #empties file dunno how to do error handling
+            file_error.seek(0)
+            file_error.truncate()
+            file_error.write(item_type + '\n'+
+                             item_name + '\n' + skin_name)
             time.sleep(1)
+
+file_error.write('.\n.\n.\n')
